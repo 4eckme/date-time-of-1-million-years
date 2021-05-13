@@ -45,12 +45,19 @@ vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom
     if ((x*x+y*y)<=150.0*150.0*N&&(x*x+y*y)>=146.0*146.0*N)//shadow
         return vec4(0.92,0.92,0.92,1.0);//shadow
     float jDatex = mod(jDate.x,10000.0);
-    float jDate1 = floor(jDate.x/10000.0);
-    float jDate2 = floor(jDate.x/100000.0);
+    float jDate1 = 0.0; float jDate2 = 0.0;// 4 digits year
+    if (jDate.x>99999.0) {//if year is 6 digits
+        jDate2 = floor(jDate.x/100000.0);
+        jDate1 = mod(jDatex,10000.0)/1000.0;
+    }
+    else if (jDate.x>9999.0) {//if year is 5 digits
+        jDate2 = floor(jDate.x/100000.0);
+        jDate1 = floor(jDate.x/10000.0);
+    }
     if ((x*x+y*y)<=145.0*145.0*N&&(x*x+y*y)>140.0*140.0*N) {//140-145 radius
       if (degrees(angle)>-180.0&&degrees(angle)<=-180.0+6.0*(floor(jDate2)))
           return years;//100000
-      if (degrees(angle)>-120.0&&(degrees((angle)))<=-120.0+6.0*(floor(jDate1)))
+      if (degrees(angle)>-120.0&&degrees(angle)<=-120.0+6.0*(floor(jDate1)))
           return years;//10000
       if (degrees(angle)>-60.0&&degrees(angle)<=-60.0+6.0*(floor(jDatex/1000.0)))
           return years;//millenium of year
@@ -101,7 +108,7 @@ vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom
 }
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {float N=iResolution.y/360.0;
     
-    jDate = iDate;// 4D TIME POINT 
+    jDate = iDate; // 4D TIME POINT 
     // You can fix it to display any date and any time of 1 million years.
     
     vec2 coord = fragCoord - (iResolution.xy / vec2(2.0));//simmetric
