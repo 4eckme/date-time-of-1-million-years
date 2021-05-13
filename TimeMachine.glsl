@@ -1,5 +1,6 @@
-const float M_PI = 3.14159265358979323846264338327950288;
-vec4 jDate;
+vec4 jDate; const float M_PI = 3.14159265358979323846264338327950288;
+
+// day of week fuction
 float day() {
     float jDatex=jDate.x;
     float y366 = floor((jDatex-0.0)/400.0)+floor((jDatex-0.0)/4.0)-floor((jDatex-0.0)/100.0);
@@ -21,7 +22,9 @@ float day() {
     if (jDate.y >= 11.0) d+=30.0;
     return mod(d+jDate.z-2.0, 7.0)+1.0;
 }
-vec4 bg(vec2 fragCoord) {//scene
+
+//scene function
+vec4 bg(vec2 fragCoord) {
     vec2 coord = (fragCoord)*4.0;
    	float t = (iTime);
     float x = float(coord.x)+64.0*sin((coord.x+coord.y)/60.0);
@@ -38,13 +41,11 @@ vec4 bg(vec2 fragCoord) {//scene
     fragColor.z+=(tan((degrees(atan(x, y))*1.0-t*2.0)))/4.0;
     return fragColor;
 }
+
+//clock function
 vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom 
-    float angle=atan(-x, -y);
-    vec4 res = vec4(1.0, 1.0, 1.0, 1.0);//clock color
-    vec4 years = vec4(0.2, 0.2, 0.2, 1.0);//years controller
-    if ((x*x+y*y)<=150.0*150.0*N&&(x*x+y*y)>=146.0*146.0*N)//shadow
-        return vec4(0.92,0.92,0.92,1.0);//shadow
-    float jDatex = mod(jDate.x,10000.0);
+    jDate.x = mod(jDate.x, 1000000.0);//do a barrel roll after 1 million years of work 
+    float jDatex = mod(jDate.x,10000.0);//4 last digits of year
     float jDate1 = 0.0; float jDate2 = 0.0;// 4 digits year
     if (jDate.x>99999.0) {//if year is 6 digits
         jDate2 = floor(jDate.x/100000.0);
@@ -54,6 +55,11 @@ vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom
         jDate2 = floor(jDate.x/100000.0);
         jDate1 = floor(jDate.x/10000.0);
     }
+    float angle=atan(-x, -y);
+    vec4 res = vec4(1.0, 1.0, 1.0, 1.0);//clock color
+    vec4 years = vec4(0.2, 0.2, 0.2, 1.0);//years controller
+    if ((x*x+y*y)<=150.0*150.0*N&&(x*x+y*y)>=146.0*146.0*N)//light shadow
+        return vec4(0.92,0.92,0.92,1.0);//shadow
     if ((x*x+y*y)<=145.0*145.0*N&&(x*x+y*y)>140.0*140.0*N) {//140-145 radius
       if (degrees(angle)>-180.0&&degrees(angle)<=-180.0+6.0*(floor(jDate2)))
           return years;//100000
@@ -68,16 +74,14 @@ vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom
       if (degrees(angle)>120.0&&degrees(angle)<=(120.0+6.0*(floor(mod(jDatex,10.0)))))
           return years;//last num of year
     }
-
     if ((x*x+y*y)<145.0*145.0*N&&(x*x+y*y)>=135.0*135.0*N)//135-145 radius
       if (180.0+degrees(angle)<30.0*(jDate.y+1.0)&&180.0+degrees(angle)>30.0*(jDate.y+1.0)-6.0*day())
         return vec4(1.0,0.7,0.1,1.0);//day of week yellow color (month, day)
     
     if ((x*x+y*y)<145.0*145.0*N&&(x*x+y*y)>=135.0*135.0*N)//135-145 radius
       if (180.0+degrees(angle)>30.0*(jDate.y+1.0)&&180.0+degrees(angle)<30.0*(jDate.y+1.0)+6.0*jDate.z)
-        return vec4(0.25,0.75,0.25,1.0);//date green color (month, day)
-       
-     if (x*x+y*y<=20.0*20.0*N)//10 radius
+        return vec4(0.25,0.75,0.25,1.0);//date green color (month, day)  
+    if (x*x+y*y<=20.0*20.0*N)//10 radius
         return vec4(1.0,1.0,1.0, 1.0);
     if ((x*x+y*y)<=90.0*90.0*N)//90 radius
       if (int(ceil(60.0*angle/2.0/M_PI))==-int(floor(30.0-mod(((t+0.001)/60.0/12.0),60.0))))
@@ -90,7 +94,6 @@ vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom
         return vec4(1.0,0.0,0.6,1.0);//seconds arrow color
     if ((x*x+y*y)<=150.0*150.0*N)//150 radius
         return res;//clock color
-   
     if ((x*x+y*y)<=170.0*170.0*N) {//170 radius
         float dt = 0.0; float jDatew = t;
         if(mod(floor(jDatew/3600.0), 24.0)>=12.0) dt=1.0;// dt sets PM/AM
@@ -104,8 +107,10 @@ vec4 f(float x, float y, float t) {float N=iResolution.y/360.0;//clock zoom
         if(abs(y)<10000.0)res = bg(vec2(x,y))/1.0;//new scene
         return res;
     }
-    
 }
+
+
+// START
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {float N=iResolution.y/360.0;
     
     jDate = iDate; // 4D TIME POINT 
